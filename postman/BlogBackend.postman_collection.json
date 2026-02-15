@@ -1,0 +1,342 @@
+{
+  "info": {
+    "_postman_id": "f95e93bd-aa5f-45f5-b3a6-e85d7f2db1e8",
+    "name": "BlogBackend API",
+    "description": "Postman collection for Blog backend v1 (ASP.NET Core).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "apiVersion", "value": "1" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "postId", "value": "00000000-0000-0000-0000-000000000000" },
+    { "key": "categoryId", "value": "00000000-0000-0000-0000-000000000000" },
+    { "key": "userId", "value": "00000000-0000-0000-0000-000000000000" },
+    { "key": "postSlug", "value": "hello-world" },
+    { "key": "categorySlug", "value": "general" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{accessToken}}", "type": "string" }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"editor@example.com\",\n  \"password\": \"Password123!\",\n  \"role\": \"editor\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v{{apiVersion}}/auth/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v{{apiVersion}}", "auth", "signup"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const data = pm.response.json();",
+                  "  if (data.accessToken) pm.collectionVariables.set('accessToken', data.accessToken);",
+                  "  if (data.refreshToken) pm.collectionVariables.set('refreshToken', data.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Signin",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"editor@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v{{apiVersion}}/auth/signin",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v{{apiVersion}}", "auth", "signin"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const data = pm.response.json();",
+                  "  if (data.accessToken) pm.collectionVariables.set('accessToken', data.accessToken);",
+                  "  if (data.refreshToken) pm.collectionVariables.set('refreshToken', data.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v{{apiVersion}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v{{apiVersion}}", "auth", "refresh"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const data = pm.response.json();",
+                  "  if (data.accessToken) pm.collectionVariables.set('accessToken', data.accessToken);",
+                  "  if (data.refreshToken) pm.collectionVariables.set('refreshToken', data.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v{{apiVersion}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v{{apiVersion}}", "auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Posts",
+      "item": [
+        {
+          "name": "Get Published Posts",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v{{apiVersion}}/posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v{{apiVersion}}", "posts"]
+            }
+          }
+        },
+        {
+          "name": "Get Post By Slug",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v{{apiVersion}}/posts/{{postSlug}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v{{apiVersion}}", "posts", "{{postSlug}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Post (Editor/Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"My First Post\",\n  \"slug\": \"my-first-post\",\n  \"content\": \"Post body\",\n  \"authorId\": \"{{userId}}\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"publish\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v{{apiVersion}}/posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v{{apiVersion}}", "posts"]
+            }
+          }
+        },
+        {
+          "name": "Update Post (Editor/Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Post\",\n  \"slug\": \"updated-post\",\n  \"content\": \"Updated body\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"publish\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v{{apiVersion}}/posts/{{postId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v{{apiVersion}}", "posts", "{{postId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Post (Editor/Admin)",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v{{apiVersion}}/posts/{{postId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v{{apiVersion}}", "posts", "{{postId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Get Categories",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v{{apiVersion}}/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v{{apiVersion}}", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Get Category By Slug",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v{{apiVersion}}/categories/{{categorySlug}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v{{apiVersion}}", "categories", "{{categorySlug}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Category (Editor/Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"General\",\n  \"slug\": \"general\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v{{apiVersion}}/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v{{apiVersion}}", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Update Category (Editor/Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"General Updated\",\n  \"slug\": \"general-updated\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v{{apiVersion}}/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v{{apiVersion}}", "categories", "{{categoryId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Category (Editor/Admin)",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v{{apiVersion}}/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v{{apiVersion}}", "categories", "{{categoryId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users (Admin)",
+      "item": [
+        {
+          "name": "Get Users",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v{{apiVersion}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v{{apiVersion}}", "users"]
+            }
+          }
+        },
+        {
+          "name": "Get User By Id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v{{apiVersion}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v{{apiVersion}}", "users", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update User Role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"editor\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v{{apiVersion}}/users/{{userId}}/role",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v{{apiVersion}}", "users", "{{userId}}", "role"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

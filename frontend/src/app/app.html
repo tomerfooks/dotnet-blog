@@ -1,0 +1,42 @@
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a class="brand" routerLink="/">Blog</a>
+
+    <nav class="topnav">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Posts</a>
+
+      <a
+        *ngIf="authState.role() === 'Editor' || authState.role() === 'Admin'"
+        routerLink="/manage/posts"
+        routerLinkActive="active"
+      >
+        Manage Posts
+      </a>
+
+      <a
+        *ngIf="authState.role() === 'Editor' || authState.role() === 'Admin'"
+        routerLink="/manage/categories"
+        routerLinkActive="active"
+      >
+        Categories
+      </a>
+
+      <a *ngIf="authState.role() === 'Admin'" routerLink="/admin/users" routerLinkActive="active">Users</a>
+
+      <a *ngIf="!authState.isAuthenticated()" routerLink="/signin" routerLinkActive="active">Sign in</a>
+      <a *ngIf="!authState.isAuthenticated()" routerLink="/signup" routerLinkActive="active">Sign up</a>
+
+      <button type="button" class="secondary" (click)="toggleTheme()">
+        {{ isDarkMode() ? 'Light mode' : 'Dark mode' }}
+      </button>
+
+      <button *ngIf="authState.isAuthenticated()" type="button" class="secondary" (click)="logout()">
+        Logout
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main class="container main-content">
+  <router-outlet></router-outlet>
+</main>
