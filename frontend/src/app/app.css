@@ -1,6 +1,6 @@
 .topbar {
 	border-bottom: 1px solid var(--border);
-	background: var(--surface);
+	background: linear-gradient(90deg, var(--surface), var(--surface-tint));
 	position: sticky;
 	top: 0;
 	z-index: 10;
@@ -17,7 +17,7 @@
 .brand {
 	font-size: 1.2rem;
 	font-weight: 700;
-	color: var(--text);
+	color: var(--primary-strong);
 	text-decoration: none;
 }
 
@@ -37,13 +37,14 @@
 	color: var(--text-muted);
 	background: transparent;
 	font: inherit;
+	transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 
 .topnav a:hover,
 .topnav a.active {
-	color: var(--text);
-	border-color: var(--border);
-	background: var(--surface-muted);
+	color: var(--primary-strong);
+	border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
+	background: color-mix(in srgb, var(--primary) 12%, var(--surface-muted));
 }
 
 .main-content {
