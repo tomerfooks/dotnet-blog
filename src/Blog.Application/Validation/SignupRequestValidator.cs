@@ -18,7 +18,7 @@ public sealed class SignupRequestValidator : AbstractValidator<SignupRequest>
             .MaximumLength(128);
 
         RuleFor(x => x.Role)
-            .Must(static role => role is null || role is "guest" or "editor" or "admin")
+            .Must(static role => UserRoleInput.TryParse(role, out _))
             .WithMessage("Role must be one of: guest, editor, admin.");
     }
 }

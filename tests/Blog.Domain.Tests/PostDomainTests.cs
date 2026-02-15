@@ -1,5 +1,6 @@
 using Blog.Domain.Entities;
 using Blog.Domain.Enums;
+using Xunit;
 
 namespace Blog.Domain.Tests;
 

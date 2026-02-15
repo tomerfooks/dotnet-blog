@@ -14,12 +14,12 @@ public sealed class CategoryRepository(BlogDbContext dbContext) : ICategoryRepos
 
     public async Task<Category?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default)
     {
-        return await dbContext.Categories.FirstOrDefaultAsync(x => x.Slug == slug, cancellationToken);
+        return await dbContext.Categories.AsNoTracking().FirstOrDefaultAsync(x => x.Slug == slug, cancellationToken);
     }
 
     public async Task<IReadOnlyList<Category>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await dbContext.Categories.OrderBy(x => x.Name).ToListAsync(cancellationToken);
+        return await dbContext.Categories.AsNoTracking().OrderBy(x => x.Name).ToListAsync(cancellationToken);
     }
 
     public async Task AddAsync(Category category, CancellationToken cancellationToken = default)

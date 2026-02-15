@@ -19,6 +19,7 @@ public sealed class PostRepository(BlogDbContext dbContext) : IPostRepository
     public async Task<Post?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default)
     {
         return await dbContext.Posts
+            .AsNoTracking()
             .Include(x => x.Category)
             .Include(x => x.Author)
             .FirstOrDefaultAsync(x => x.Slug == slug, cancellationToken);
@@ -27,6 +28,9 @@ public sealed class PostRepository(BlogDbContext dbContext) : IPostRepository
     public async Task<IReadOnlyList<Post>> GetPublishedAsync(CancellationToken cancellationToken = default)
     {
         return await dbContext.Posts
+            .AsNoTracking()
+            .Include(x => x.Category)
+            .Include(x => x.Author)
             .Where(x => x.Status == PostStatus.Published)
             .OrderByDescending(x => x.PublishedAtUtc)
             .ToListAsync(cancellationToken);

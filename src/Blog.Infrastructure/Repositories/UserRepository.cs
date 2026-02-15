@@ -14,7 +14,7 @@ public sealed class UserRepository(BlogDbContext dbContext) : IUserRepository
 
     public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
-        return await dbContext.Users.FirstOrDefaultAsync(x => x.Email == email, cancellationToken);
+        return await dbContext.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Email == email, cancellationToken);
     }
 
     public async Task AddAsync(User user, CancellationToken cancellationToken = default)
@@ -24,7 +24,7 @@ public sealed class UserRepository(BlogDbContext dbContext) : IUserRepository
 
     public async Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await dbContext.Users.OrderBy(x => x.Email).ToListAsync(cancellationToken);
+        return await dbContext.Users.AsNoTracking().OrderBy(x => x.Email).ToListAsync(cancellationToken);
     }
 
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
