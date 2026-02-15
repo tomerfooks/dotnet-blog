@@ -2,11 +2,15 @@
 	--bg: #f6f7fb;
 	--surface: #ffffff;
 	--surface-muted: #f2f4f8;
+	--surface-tint: #eef4ff;
 	--border: #d7dde8;
 	--text: #121826;
 	--text-muted: #4a5568;
 	--danger: #cc2e2e;
-	--primary: #1e4fd1;
+	--primary: #2f55d4;
+	--primary-strong: #1f3fa8;
+	--accent: #7c3aed;
+	--accent-soft: #f3ecff;
 
 	--radius-sm: 0.5rem;
 	--radius-md: 0.8rem;
@@ -19,11 +23,15 @@
 	--bg: #0f172a;
 	--surface: #111827;
 	--surface-muted: #1f2937;
+	--surface-tint: #142346;
 	--border: #334155;
 	--text: #e5e7eb;
 	--text-muted: #94a3b8;
 	--danger: #ef4444;
 	--primary: #60a5fa;
+	--primary-strong: #3b82f6;
+	--accent: #a78bfa;
+	--accent-soft: #2b1f45;
 	--shadow-sm: 0 8px 24px rgba(2, 6, 23, 0.35);
 }
 
@@ -42,6 +50,8 @@ body {
 
 a {
 	color: var(--primary);
+	text-decoration-thickness: 2px;
+	text-underline-offset: 2px;
 }
 
 h1,
@@ -72,6 +82,12 @@ form {
 	border: 1px solid var(--border);
 	border-radius: var(--radius-md);
 	box-shadow: var(--shadow-sm);
+}
+
+.card,
+.auth-card,
+.article {
+	background-image: linear-gradient(180deg, var(--surface-tint), var(--surface));
 }
 
 .auth-card,
@@ -128,6 +144,14 @@ select {
 	color: var(--text);
 }
 
+input:focus,
+textarea:focus,
+select:focus {
+	outline: 2px solid color-mix(in srgb, var(--primary) 35%, transparent);
+	outline-offset: 1px;
+	border-color: var(--primary);
+}
+
 textarea {
 	resize: vertical;
 }
@@ -135,7 +159,7 @@ textarea {
 button,
 .button-link {
 	border: 1px solid var(--primary);
-	background: var(--primary);
+	background: linear-gradient(135deg, var(--primary), var(--accent));
 	color: #fff;
 	border-radius: var(--radius-sm);
 	padding: 0.52rem 0.72rem;
@@ -143,11 +167,16 @@ button,
 	cursor: pointer;
 }
 
+button:hover,
+.button-link:hover {
+	filter: brightness(1.04);
+}
+
 button.secondary,
 .secondary {
-	background: var(--surface);
+	background: var(--accent-soft);
 	color: var(--text);
-	border-color: var(--border);
+	border-color: color-mix(in srgb, var(--accent) 28%, var(--border));
 }
 
 button.danger,
