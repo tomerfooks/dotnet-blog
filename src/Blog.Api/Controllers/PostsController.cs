@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using Blog.Api.Contracts.Posts;
+using Blog.Api.Contracts.Responses;
 using Blog.Domain.Entities;
 using Blog.Domain.Enums;
 using Blog.Domain.Repositories;
@@ -17,16 +18,16 @@ public sealed class PostsController(IPostRepository postRepository, IOutputCache
     [AllowAnonymous]
     [HttpGet]
     [OutputCache(Duration = 60, Tags = ["posts"])]
-    public async Task<ActionResult<IReadOnlyList<Post>>> GetPublished(CancellationToken cancellationToken)
+    public async Task<ActionResult<IReadOnlyList<PostResponse>>> GetPublished(CancellationToken cancellationToken)
     {
         var posts = await postRepository.GetPublishedAsync(cancellationToken);
-        return Ok(posts);
+        return Ok(posts.Select(Map));
     }
 
     [AllowAnonymous]
     [HttpGet("{slug}")]
     [OutputCache(Duration = 300, Tags = ["posts"])]
-    public async Task<ActionResult<Post>> GetBySlug(string slug, CancellationToken cancellationToken)
+    public async Task<ActionResult<PostResponse>> GetBySlug(string slug, CancellationToken cancellationToken)
     {
         var post = await postRepository.GetBySlugAsync(slug, cancellationToken);
         if (post is null)
@@ -34,12 +35,12 @@ public sealed class PostsController(IPostRepository postRepository, IOutputCache
             return NotFound();
         }
 
-        return Ok(post);
+        return Ok(Map(post));
     }
 
     [Authorize(Policy = "EditorOrAdmin")]
     [HttpPost]
-    public async Task<ActionResult<Post>> Create([FromBody] CreatePostRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<PostResponse>> Create([FromBody] CreatePostRequest request, CancellationToken cancellationToken)
     {
         var post = new Post
         {
@@ -56,12 +57,12 @@ public sealed class PostsController(IPostRepository postRepository, IOutputCache
         await postRepository.SaveChangesAsync(cancellationToken);
         await outputCacheStore.EvictByTagAsync("posts", cancellationToken);
 
-        return CreatedAtAction(nameof(GetBySlug), new { slug = post.Slug, version = "1" }, post);
+        return CreatedAtAction(nameof(GetBySlug), new { slug = post.Slug, version = "1" }, Map(post));
     }
 
     [Authorize(Policy = "EditorOrAdmin")]
     [HttpPut("{id:guid}")]
-    public async Task<ActionResult<Post>> Update(Guid id, [FromBody] UpdatePostRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<PostResponse>> Update(Guid id, [FromBody] UpdatePostRequest request, CancellationToken cancellationToken)
     {
         var post = await postRepository.GetByIdAsync(id, cancellationToken);
         if (post is null)
@@ -80,7 +81,7 @@ public sealed class PostsController(IPostRepository postRepository, IOutputCache
         await postRepository.SaveChangesAsync(cancellationToken);
         await outputCacheStore.EvictByTagAsync("posts", cancellationToken);
 
-        return Ok(post);
+        return Ok(Map(post));
     }
 
     [Authorize(Policy = "EditorOrAdmin")]
@@ -98,5 +99,20 @@ public sealed class PostsController(IPostRepository postRepository, IOutputCache
         await outputCacheStore.EvictByTagAsync("posts", cancellationToken);
 
         return NoContent();
+    }
+
+    private static PostResponse Map(Post post)
+    {
+        return new PostResponse(
+            post.Id,
+            post.Title,
+            post.Slug,
+            post.Content,
+            post.Status.ToString(),
+            post.PublishedAtUtc,
+            post.Author is null ? null : new PostAuthorSummary(post.Author.Id, post.Author.Email, post.Author.Role.ToString()),
+            post.Category is null ? null : new PostCategorySummary(post.Category.Id, post.Category.Name, post.Category.Slug),
+            post.CreatedAtUtc,
+            post.UpdatedAtUtc);
     }
 }

@@ -1,8 +1,8 @@
 using Asp.Versioning;
+using Blog.Api.Contracts.Responses;
 using Blog.Application.Abstractions;
 using Blog.Application.Auth;
 using Blog.Domain.Entities;
-using Blog.Domain.Enums;
 using Blog.Domain.Repositories;
 using Blog.Infrastructure.Options;
 using FluentValidation;
@@ -41,12 +41,7 @@ public sealed class AuthController(
             return Conflict(new { message = "Email is already registered." });
         }
 
-        var role = request.Role?.ToLowerInvariant() switch
-        {
-            "admin" => UserRole.Admin,
-            "editor" => UserRole.Editor,
-            _ => UserRole.Guest
-        };
+        UserRoleInput.TryParse(request.Role, out var role);
 
         var user = new User
         {

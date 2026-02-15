@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using Blog.Api.Contracts.Categories;
+using Blog.Api.Contracts.Responses;
 using Blog.Domain.Entities;
 using Blog.Domain.Repositories;
 using Microsoft.AspNetCore.Authorization;
@@ -16,16 +17,16 @@ public sealed class CategoriesController(ICategoryRepository categoryRepository,
     [AllowAnonymous]
     [HttpGet]
     [OutputCache(Duration = 60, Tags = ["categories"])]
-    public async Task<ActionResult<IReadOnlyList<Category>>> GetAll(CancellationToken cancellationToken)
+    public async Task<ActionResult<IReadOnlyList<CategoryResponse>>> GetAll(CancellationToken cancellationToken)
     {
         var categories = await categoryRepository.GetAllAsync(cancellationToken);
-        return Ok(categories);
+        return Ok(categories.Select(Map));
     }
 
     [AllowAnonymous]
     [HttpGet("{slug}")]
     [OutputCache(Duration = 300, Tags = ["categories"])]
-    public async Task<ActionResult<Category>> GetBySlug(string slug, CancellationToken cancellationToken)
+    public async Task<ActionResult<CategoryResponse>> GetBySlug(string slug, CancellationToken cancellationToken)
     {
         var category = await categoryRepository.GetBySlugAsync(slug, cancellationToken);
         if (category is null)
@@ -33,12 +34,12 @@ public sealed class CategoriesController(ICategoryRepository categoryRepository,
             return NotFound();
         }
 
-        return Ok(category);
+        return Ok(Map(category));
     }
 
     [Authorize(Policy = "EditorOrAdmin")]
     [HttpPost]
-    public async Task<ActionResult<Category>> Create([FromBody] CreateCategoryRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<CategoryResponse>> Create([FromBody] CreateCategoryRequest request, CancellationToken cancellationToken)
     {
         var category = new Category
         {
@@ -50,12 +51,12 @@ public sealed class CategoriesController(ICategoryRepository categoryRepository,
         await categoryRepository.SaveChangesAsync(cancellationToken);
         await outputCacheStore.EvictByTagAsync("categories", cancellationToken);
 
-        return CreatedAtAction(nameof(GetBySlug), new { slug = category.Slug, version = "1" }, category);
+        return CreatedAtAction(nameof(GetBySlug), new { slug = category.Slug, version = "1" }, Map(category));
     }
 
     [Authorize(Policy = "EditorOrAdmin")]
     [HttpPut("{id:guid}")]
-    public async Task<ActionResult<Category>> Update(Guid id, [FromBody] UpdateCategoryRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<CategoryResponse>> Update(Guid id, [FromBody] UpdateCategoryRequest request, CancellationToken cancellationToken)
     {
         var category = await categoryRepository.GetByIdAsync(id, cancellationToken);
         if (category is null)
@@ -70,7 +71,7 @@ public sealed class CategoriesController(ICategoryRepository categoryRepository,
         await categoryRepository.SaveChangesAsync(cancellationToken);
         await outputCacheStore.EvictByTagAsync("categories", cancellationToken);
 
-        return Ok(category);
+        return Ok(Map(category));
     }
 
     [Authorize(Policy = "EditorOrAdmin")]
@@ -88,5 +89,10 @@ public sealed class CategoriesController(ICategoryRepository categoryRepository,
         await outputCacheStore.EvictByTagAsync("categories", cancellationToken);
 
         return NoContent();
+    }
+
+    private static CategoryResponse Map(Category category)
+    {
+        return new CategoryResponse(category.Id, category.Name, category.Slug, category.CreatedAtUtc, category.UpdatedAtUtc);
     }
 }

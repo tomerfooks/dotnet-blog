@@ -1,6 +1,7 @@
 using Asp.Versioning;
+using Blog.Api.Contracts.Responses;
+using Blog.Application.Auth;
 using Blog.Api.Contracts.Users;
-using Blog.Domain.Enums;
 using Blog.Domain.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +18,7 @@ public sealed class UsersController(IUserRepository userRepository) : Controller
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var users = await userRepository.GetAllAsync(cancellationToken);
-        return Ok(users.Select(x => new { x.Id, x.Email, Role = x.Role.ToString(), x.CreatedAtUtc, x.UpdatedAtUtc }));
+        return Ok(users.Select(Map));
     }
 
     [HttpGet("{id:guid}")]
@@ -29,7 +30,7 @@ public sealed class UsersController(IUserRepository userRepository) : Controller
             return NotFound();
         }
 
-        return Ok(new { user.Id, user.Email, Role = user.Role.ToString(), user.CreatedAtUtc, user.UpdatedAtUtc });
+        return Ok(Map(user));
     }
 
     [HttpPatch("{id:guid}/role")]
@@ -41,23 +42,20 @@ public sealed class UsersController(IUserRepository userRepository) : Controller
             return NotFound();
         }
 
-        var parsedRole = request.Role?.Trim().ToLowerInvariant() switch
-        {
-            "admin" => UserRole.Admin,
-            "editor" => UserRole.Editor,
-            "guest" => UserRole.Guest,
-            _ => (UserRole?)null
-        };
-
-        if (parsedRole is null)
+        if (!UserRoleInput.TryParseRequired(request.Role, out var parsedRole))
         {
             return BadRequest(new { message = "Invalid role. Allowed: guest, editor, admin." });
         }
 
-        user.Role = parsedRole.Value;
+        user.Role = parsedRole;
         user.UpdatedAtUtc = DateTime.UtcNow;
         await userRepository.SaveChangesAsync(cancellationToken);
 
-        return Ok(new { user.Id, user.Email, Role = user.Role.ToString(), user.CreatedAtUtc, user.UpdatedAtUtc });
+        return Ok(Map(user));
+    }
+
+    private static UserResponse Map(Blog.Domain.Entities.User user)
+    {
+        return new UserResponse(user.Id, user.Email, user.Role.ToString(), user.CreatedAtUtc, user.UpdatedAtUtc);
     }
 }
